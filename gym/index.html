@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fitness Club</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@100&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <style>
+      body {
+        margin: 0px;
+        padding: 0px;
+        background-image: url("/gym/bg.jpg");
+        background-repeat: no-repeat;
+        display: block;
+        color: rgb(251, 253, 255);
+      }
+      .logo {
+        display: inline-block;
+        position: absolute;
+        top: 20px;
+        left: 10px;
+      }
+      .logo img {
+        width: 75px;
+        height: 75px;
+        margin: auto;
+      }
+      .logo div {
+        line-height: 3px;
+        text-align: center;
+        font-size: 12px;
+      }
+
+      .mid {
+        border: 2px solid darkgray;
+        display: block;
+        width: 40%;
+        margin: 20px auto;
+        font-family: "Roboto", sans-serif;
+      }
+
+      .navbar li {
+        font-size: 20px;
+        display: inline-block;
+      }
+      .navbar li a {
+        text-decoration: none;
+        color: aliceblue;
+        padding: 40px 25px;
+      }
+      .navbar li a:hover,
+      .navbar li a.active {
+        color: grey;
+        text-decoration: underline;
+      }
+
+      .login {
+        position: absolute;
+        right: 24px;
+        display: inline-block;
+        
+        top: 20px;
+      }
+      .btn {
+        font-family: "Roboto", sans-serif;
+        background-color: black;
+        margin: 9px auto;
+        padding: 8px 14px;
+        color: aliceblue;
+        border-radius: 20%;
+        font-size: 15px;
+        cursor: pointer;
+        border: 2px solid grey;
+        font-size: 13px;
+      }
+      .btn:hover {
+        color: rgb(216, 236, 127);
+      }
+      .container {
+        border: 2px solid rgb(67, 64, 64);
+        margin: 106px 80px;
+        padding: 75px;
+        width: 33%;
+        border-radius: 28px;
+        
+      }
+      .container h2 {
+        text-align: justify;
+      }
+      .container button {
+        display: block;
+        width: 125px;
+        margin: 15px auto;
+        border-radius: 14px;
+      }
+      .form-group input  {
+        font-family: "Roboto", sans-serif;
+        text-align: center;
+        width: 150px;
+        padding: 2px;
+        margin: 8px auto;
+        border: 2px solid grey;
+        display: block;
+        border-radius: 8px;
+        font-size: 19px;
+        background-color: aliceblue;
+      }
+      
+    </style>
+    <header class="header">
+      <div class="logo">
+        <img src="/gym/logo.png" alt="logo" />
+        <div>Fitness Club</div>
+      </div>
+
+      <div class="mid">
+        <ul class="navbar">
+          <li><a href="#">Home</a></li>
+          <li><a href="#">Fitness</a></li>
+          <li><a href="#">AboutUs</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+
+      <div class="login">
+        <button class="btn">Call Us</button>
+        <button class="btn">Login</button>
+      </div>
+    </header>
+    <div class="container">
+      <h2>
+        "Ready to start your fitness journey? Fill out our gym membership form
+        today and take the first step toward a healthier, happier you!"
+      </h2>
+      <form action="noaction.php">
+        <div class="form-group">
+        <input type="text" name="" placeholder="First Name" />
+        </div>
+        <div class="form-group">
+          <input type="text" name="" placeholder="Last Name" />
+        </div>
+        <div class="form-group">
+          <input type="tel" name="" placeholder="Contact" />
+        </div>
+        <div class="form-group">
+          <input type="email" name="" placeholder="Email" />
+        </div>
+         
+        <!-- <div class="form-group">
+                <input type="text" name="" placeholder="">
+          </div> -->
+        <button class="btn">Submit</button>
+      </form>
+    </div>
+  </body>
+</html>
