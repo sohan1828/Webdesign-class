@@ -23,16 +23,16 @@
       .logo {
         display: inline-block;
         position: absolute;
-        top: 20px;
+        top: 15px;
         left: 10px;
       }
       .logo img {
         width: 75px;
         height: 75px;
-        margin: auto;
+        margin:  auto;
       }
       .logo div {
-        line-height: 3px;
+        line-height: 4px;
         text-align: center;
         font-size: 12px;
       }
@@ -64,8 +64,8 @@
         position: absolute;
         right: 24px;
         display: inline-block;
-        
-        top: 20px;
+        padding: 8px;
+        top: 25px;
       }
       .btn {
         font-family: "Roboto", sans-serif;
@@ -111,6 +111,9 @@
         font-size: 19px;
         background-color: aliceblue;
       }
+      .gender{
+        text-align: center;
+      }
       
     </style>
     <header class="header">
@@ -151,12 +154,23 @@
         <div class="form-group">
           <input type="email" name="" placeholder="Email" />
         </div>
-         
-        <!-- <div class="form-group">
-                <input type="text" name="" placeholder="">
-          </div> -->
+    
+        <div class="gender">
+             <label for="Gender">Gender:</label>
+             
+             
+               <input type="radio"name="Gender">
+               <label for="Gender1">Male</label>
+               <input type="radio" name="Gender"~>
+               <label for="Gender2">Female</label>
+            
+              </div>
+
+        
         <button class="btn">Submit</button>
+        
+      </div>   
       </form>
-    </div>
+
   </body>
 </html>
