@@ -1,146 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
-  <div class="login">
-    <a href="/login.html"><button> LogIn/SignUp</button></a>
-  </div>
 <head>
-    
-   
-  
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="name" content="coffee">
-    <link rel="stylesheet" href="coffee.css">
-   
-    <title>CoffeeShop</title>
-     <script src="coffee.js"></script>
-     <img  src="1.png" alt="logo" height="75px" width="75px">
-     <div class="container">
-     <h1 >MIDNIGHT MUG </h1>
-     <p id="tagline"><i>"Awaken your sense with every sip"<i></p>
-     
-    </div>
-
-
-
-     
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Midnight Mug - a cozy coffee shop">
+  <title>Midnight Mug | Home</title>
+  <link rel="stylesheet" href="coffee.css">
 </head>
-
-<header>
-    <style>
-      *{box-sizing: border-box;}
-      /*background cover photo  */
-      body{
-        display: block;
-        background-image: url('/coffee.jpg.jpg');
-        background-size:cover;
-        background-repeat: no-repeat;
-        height: auto;
-        width: auto;
-        margin: auto;
-    }
-
-img{
-    display: block;
-    margin: auto;
-    border-radius: 50%;
-    border: 2px solid grey;
-    position: absolute;
-    float: left;
-
-
-}
-      
-      /* home aboout us  */
-
-    .navbar{
-      position:relative;
-      text-align: center;
-    border-radius: 30px;
-    color:gold;
-    background-color: rgb(37, 49, 53);
-
-    }
-    .navbar ul{
-      overflow: auto;
-    }
-    .navbar li{
-      float: left;
-      list-style:none;
-      margin: 15px 20px;
-      
-    }
-    .navbar li a{
-      text-align: center;
-      padding: 3px 3px;
-      text-decoration: none;
-      color:aliceblue;
-      float: left;
-      
-    }
-
-    .navbar li a:hover{
-      color:rgb(250, 178, 83);
-      font-family: 'Times New Roman' ;
-     
-    }
-    .navbar a.active {
-  background-color: #04AA6D;
-  color: white;
-}
-
-
-    /*  login button */
-    .login{
-      display: block;
-      padding: 3px;
-      margin:auto;
-      float: right;
-      width: 100px;
-      cursor: pointer;
-      border-radius: 4px;
-    }
-    .login button {
-      padding: 10px;
-      color:rgb(174, 99, 245);
-      cursor: pointer;
-      background-color: rgb(246, 242, 183);
-      border-radius: 30px;
-      border: 2px solid black;
-      float: none;
-      
-      
-    }
-    /* search btn */
-    .search{
-      float: right;
-      color: white;
-      padding: 15px 65px;
-    }
-    .navbar input{
-      border: 2px solid black;
-      border-radius: 34px;
-      padding: 3px 4px;
-      width: 129px;
-    }
-
-      </style>
-    
-</header>
 <body>
 
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="brand">
+        <img src="1.png" alt="Midnight Mug logo" class="logo">
+        <span class="brand-name">MIDNIGHT MUG</span>
+      </a>
 
-    <nav class="navbar">
-<ul>
-    <li><a href="#">Shop</a></li>
-    <li><a href="#">Services</a></li> 
-    <li><a href="#">About Us</a></li>
-    <div class="search">
-      <input type="text" name="search" id="search" placeholder="search this website">
-    </div>
-  </ul>
+      <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">&#9776;</button>
+
+      <nav>
+        <ul class="nav-links" id="navLinks">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="Shop.html">Shop</a></li>
+          <li><a href="index.html#about">About Us</a></li>
+        </ul>
       </nav>
-   
+
+      <div class="nav-right">
+        <a href="login.html"><button class="login-btn">Login / Sign Up</button></a>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-content">
+      <h1>MIDNIGHT MUG</h1>
+      <p class="tagline">"Awaken your senses with every sip"</p>
+      <a href="Shop.html"><button class="cta-btn">View Menu</button></a>
+    </div>
+  </section>
+
+  <section id="about" class="about">
+    <h2>About Us</h2>
+    <p>
+      Midnight Mug is a small coffee shop for people who love a good cup no
+      matter the hour. From a bold double shot espresso to a slow, comforting
+      latte, every drink is made fresh to order. Come in, sit down, and let
+      the aroma do the talking.
+    </p>
+  </section>
+
+  <footer>
+    <p id="quote"><em>"To me, the smell of fresh-made coffee is one of the greatest inventions." &mdash; Hugh Jackman</em></p>
+    <hr>
+    <h5>Contact Us</h5>
+    <p>Have a question? We'd love to hear from you.</p>
+    <p>midnightmug@gmail.com</p>
+    <p><strong>Contact Number: 000-000-0000</strong></p>
+  </footer>
+
+  <script src="coffee.js"></script>
 </body>
 </html>
