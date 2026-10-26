@@ -20,6 +20,8 @@ set_exception_handler(function (Throwable $e): void {
   exit;
 });
 
+date_default_timezone_set((string) ($GLOBALS["fc_cfg"]["timezone"] ?? "Asia/Kathmandu"));
+
 function cfg(string $key, $default = null) { return $GLOBALS['fc_cfg'][$key] ?? $default; }
 
 function out(array $data, int $code = 200): void {
@@ -78,19 +80,53 @@ function session_boot(): void {
   session_start();
 }
 
-/** Stops the request unless a logged-in admin sent it (and, for POST, sent the right CSRF token). */
-function require_admin(): void {
+/** Stops the request unless the signed-in person has this role: owner, trainer or member. POST needs the CSRF token too. */
+function require_role(string $role): void {
   session_boot();
-  if (empty($_SESSION['uid'])) fail('Not logged in', 401);
+  if (empty($_SESSION['role'])) fail('Not logged in', 401);
   if (($_SESSION['last'] ?? 0) < time() - (int) cfg('session_idle', 7200)) {
     $_SESSION = []; session_destroy();
     fail('Session expired. Please log in again.', 401);
   }
+  if ($_SESSION['role'] !== $role) fail('Not allowed', 403);
   $_SESSION['last'] = time();
   if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     $sent = (string) ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? '');
     if ($sent === '' || !hash_equals((string) ($_SESSION['csrf'] ?? ''), $sent)) fail('Bad security token. Reload the page.', 403);
   }
+}
+function require_admin(): void { require_role('owner'); }
+
+/** Starts a fresh session for a verified login. */
+function start_session(array $fields): string {
+  session_boot();
+  session_regenerate_id(true);
+  $csrf = bin2hex(random_bytes(32));
+  $_SESSION = $fields + ['csrf' => $csrf, 'last' => time()];
+  return $csrf;
+}
+
+/** Start time of a class on a date (Y-m-d), as a unix timestamp in the gym's timezone. */
+function class_start(array $c, string $date): int {
+  $dt = DateTime::createFromFormat('Y-m-d H:i', $date . ' ' . (string) ($c['time'] ?? '00:00'));
+  return $dt ? $dt->getTimestamp() : 0;
+}
+/** All sessions keyed by id. */
+function load_classes(): array {
+  $o = [];
+  foreach (db()->query('SELECT data FROM classes')->fetchAll() as $r) { $c = json_decode($r['data'], true); if (is_array($c) && isset($c['id'])) $o[$c['id']] = $c; }
+  return $o;
+}
+function load_trainers(): array {
+  $o = [];
+  foreach (db()->query('SELECT data FROM trainers')->fetchAll() as $r) { $t = json_decode($r['data'], true); if (is_array($t) && isset($t['id'])) $o[$t['id']] = $t; }
+  return $o;
+}
+/** The fields of a session that are safe to show to anyone. */
+function public_class(array $c, array $trainers): array {
+  $t = $trainers[$c['trainerId'] ?? ''] ?? null;
+  return ['id' => $c['id'], 'name' => (string) ($c['name'] ?? ''), 'time' => (string) ($c['time'] ?? ''), 'dur' => (int) ($c['dur'] ?? 60),
+    'days' => array_values(array_map('intval', (array) ($c['days'] ?? []))), 'cap' => (int) ($c['cap'] ?? 0), 'trainerName' => $t ? (string) $t['name'] : ''];
 }
 
 function new_id(): string { return bin2hex(random_bytes(8)); }
@@ -107,7 +143,7 @@ function columns_for(string $c, array $it): array {
     case 'members':
       $phone = phone_key((string) ($it['phone'] ?? ''));
       if ($s('name', 80) === '' || strlen($phone) < 7) fail('A member needs a name and a phone number', 422);
-      return ['phone' => $phone, 'joined' => (int) ($it['joined'] ?? 0)];
+      return ['phone' => $phone, 'joined' => (int) ($it['joined'] ?? 0), 'trainer_id' => ($it['trainerId'] ?? '') === '' ? null : $s('trainerId')];
     case 'sales':
       if (!in_array($it['type'] ?? '', ['membership', 'shop', 'plan'], true)) fail('Unknown sale type', 422);
       $amt = $it['amount'] ?? null;

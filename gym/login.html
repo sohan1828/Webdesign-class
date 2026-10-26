@@ -36,12 +36,12 @@
 
   <div class="auth-panel">
     <h1>Welcome back</h1>
-    <p>Log in to see your membership and book sessions.</p>
+    <p>Members: use your phone number. Trainers and staff: use your username. Log in to see your membership, book sessions or view your clients.</p>
 
     <form class="auth-form" id="login-form" novalidate>
       <div class="field">
-        <label for="email">Email</label>
-        <input id="email" name="email" type="email" autocomplete="email" required>
+        <label for="ident">Phone number or username</label>
+        <input id="ident" name="ident" type="text" autocomplete="username" required>
       </div>
       <div class="field">
         <label for="password">Password</label>
@@ -51,8 +51,7 @@
         </div>
       </div>
       <div class="row">
-        <label><input type="checkbox" name="remember"> Keep me logged in</label>
-        <a href="#">Forgot password?</a>
+        <span>Forgot your password? Ask at the front desk.</span>
       </div>
       <button class="btn solid" type="submit">Log in</button>
       <p id="msg" role="status" style="color:var(--shoe);font-weight:600;min-height:1.5rem"></p>
@@ -62,6 +61,8 @@
   </div>
 </main>
 
+<script src="fc-config.js"></script>
+<script src="fc-data.js"></script>
 <script>
   var pw = document.getElementById("password"), t = document.getElementById("toggle");
   t.addEventListener("click", function () {
@@ -71,13 +72,18 @@
     t.setAttribute("aria-pressed", show);
   });
 
-  // Demo only: checks the fields and shows a message. Replace with a real login request to your backend.
+  var go = { member: "account.html", trainer: "trainer.html", owner: "admin.html" };
+  FC.session().then(function (j) { if (j.ok && go[j.role]) location.replace(go[j.role]); });
   document.getElementById("login-form").addEventListener("submit", function (e) {
     e.preventDefault();
-    var msg = document.getElementById("msg"), em = document.getElementById("email");
-    if (!em.value.includes("@")) { msg.textContent = "Enter a valid email address."; em.focus(); return; }
-    if (pw.value.length < 6) { msg.textContent = "Password must be at least 6 characters."; pw.focus(); return; }
+    var msg = document.getElementById("msg"), id = document.getElementById("ident");
+    if (!id.value.trim()) { msg.textContent = "Enter your phone number or username."; id.focus(); return; }
+    if (!pw.value) { msg.textContent = "Enter your password."; pw.focus(); return; }
     msg.textContent = "Logging in...";
+    FC.signin(id.value, pw.value).then(function (j) {
+      if (j.ok && go[j.role]) { location.href = go[j.role]; return; }
+      msg.textContent = j.error || "Could not log in."; pw.value = "";
+    }).catch(function () { msg.textContent = "Cannot reach the server. Try again."; });
   });
 </script>
 <script src="script.js"></script>

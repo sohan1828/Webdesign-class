@@ -223,10 +223,7 @@
     }
     if ($("#pw").value === PASS) { try { sessionStorage.setItem("fc_admin", "1"); } catch (x) {} open(); } else { err.textContent = "Wrong password."; }
   });
-  $("#logout").onclick = function () {
-    if (FC.remote) { FC.logout().then(function () { location.reload(); }, function () { location.reload(); }); return; }
-    try { sessionStorage.removeItem("fc_admin"); } catch (x) {} location.reload();
-  };
+  $("#logout").onclick = function () { FC.signout().then(function () { location.reload(); }); };
   $("#refresh").onclick = function () { FC.refresh().then(renderAll, function (j) { $("#sync").textContent = (j && j.error) || "Could not refresh."; }); };
   window.addEventListener("fc-sync", function (e) {
     var el = $("#sync"), d = e.detail; el.className = "sub" + (d.state === "error" ? " err" : "");
@@ -235,7 +232,7 @@
   if (FC.remote) {
     $("#u-field").hidden = false; $("#user").required = true;
     $("#gate-note").textContent = "Log in with the username and password you created on the server.";
-    FC.me().then(function (j) { if (j.ok) return startRemote(); }).catch(function () {});
+    FC.me().then(function (j) { if (j.ok && j.role === "owner") return startRemote(); }).catch(function () {});
   } else {
     try { if (sessionStorage.getItem("fc_admin")) open(); } catch (x) {}
   }

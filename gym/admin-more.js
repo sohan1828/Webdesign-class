@@ -58,8 +58,42 @@
 
   /* ---------- dialogs ---------- */
   function mk(id, cls) { var d = document.createElement("dialog"); d.id = id; if (cls) d.className = cls; document.body.appendChild(d); return d; }
+  var dLg = mk("lg-dlg");
   var dCls = mk("cls-dlg"), dTr = mk("tr-dlg"), dRo = mk("ro-dlg", "wide"), dPr = mk("pr-dlg", "wide");
   document.addEventListener("click", function (e) { var c = e.target.closest("[data-close]"); if (c) c.closest("dialog").close(); });
+
+  /* ---------- logins for members and trainers ---------- */
+  function genPw() { var a = "abcdefghjkmnpqrstuvwxyz23456789", b = new Uint32Array(10); crypto.getRandomValues(b); return Array.prototype.map.call(b, function (x) { return a[x % a.length]; }).join(""); }
+  var loginUrl = function () { return new URL("login.html", location.href).href; };
+  function showCreds(box, lines, phone, msg) {
+    box.innerHTML = '<div class="panel" style="margin-top:.5rem"><strong>Give these to them now. The password is not shown again.</strong><dl class="kv" style="margin-top:.5rem">' + lines.map(function (l) { return "<dt>" + l[0] + "</dt><dd>" + esc(l[1]) + "</dd>"; }).join("") + '</dl>' +
+      (phone ? '<a class="mini go" target="_blank" rel="noopener" href="' + wa(phone, msg) + '">Send on WhatsApp</a>' : "") + "</div>";
+  }
+  function memberLogin(id) {
+    var m = byId(FC.members(), id), pw = genPw(), box = $("#login-out");
+    if (FC.logins().members[id] && !confirm("This replaces " + m.name + "'s current password. Continue?")) return;
+    FC.setMemberPassword(id, pw).then(function (j) {
+      if (!j.ok) { box.innerHTML = '<p class="err">' + esc(j.error || "Could not save the login.") + "</p>"; return; }
+      showCreds(box, [["Log in at", loginUrl()], ["Phone number", m.phone], ["Password", pw]], m.phone, "Hi " + m.name.split(" ")[0] + ", your Fitness Club login. Open " + loginUrl() + " and log in with your phone number " + m.phone + " and password " + pw + ". You can change the password after you log in.");
+      var b = $("#mlogin-btn"); if (b) b.textContent = "Reset password";
+    }, function () { box.innerHTML = '<p class="err">Cannot reach the server.</p>'; });
+  }
+  function trainerLogin(id) {
+    var t = byId(FC.trainers(), id), cur = FC.logins().trainers[id] || "";
+    dLg.innerHTML = '<form class="dlg-form" id="lg-form"><h2>Login for ' + esc(t.name) + '</h2><p class="sub">The trainer logs in on the login page and sees only their own clients and sessions.</p>' +
+      '<div class="field"><label for="lg-user">Username</label><input id="lg-user" type="text" required pattern="[a-z0-9._-]{3,40}" value="' + esc(cur || t.name.split(" ")[0].toLowerCase().replace(/[^a-z0-9]/g, "")) + '"></div>' +
+      '<div id="lg-out"></div><div class="form-foot"><button class="btn solid" type="submit">' + (cur ? "Reset password" : "Create login") + '</button><button class="btn" type="button" data-close>Close</button></div></form>';
+    $("#lg-form").onsubmit = function (e) {
+      e.preventDefault();
+      var user = $("#lg-user").value.trim().toLowerCase(), pw = genPw(), out = $("#lg-out");
+      FC.setTrainerLogin(id, user, pw).then(function (j) {
+        if (!j.ok) { out.innerHTML = '<p class="err">' + esc(j.error || "Could not save the login.") + "</p>"; return; }
+        showCreds(out, [["Log in at", loginUrl()], ["Username", user], ["Password", pw]], t.phone, "Hi " + t.name.split(" ")[0] + ", your Fitness Club trainer login. Open " + loginUrl() + " and log in with username " + user + " and password " + pw + ".");
+        render();
+      }, function () { out.innerHTML = '<p class="err">Cannot reach the server.</p>'; });
+    };
+    dLg.showModal();
+  }
 
   /* ---------- Schedule ---------- */
   function weekStart() { var t = sod(Date.now()); t.setDate(t.getDate() - t.getDay() + state.wk * 7); return t; }
@@ -122,8 +156,8 @@
     h += '<div class="tcards">' + tr.map(function (t) {
       var mine = ms.filter(function (m) { return m.trainerId === t.id; }), cs = cl.filter(function (c) { return c.trainerId === t.id; }), weekly = cs.reduce(function (s, c) { return s + c.days.length; }, 0);
       return '<div class="tcard"><div class="avatar" aria-hidden="true">' + esc(t.name.charAt(0)) + '</div><h3>' + esc(t.name) + '</h3><span class="sub">' + esc(t.specialty) + '</span>' +
-        '<dl class="kv"><dt>Experience</dt><dd>' + esc(t.years) + ' years</dd><dt>Phone</dt><dd>' + esc(t.phone) + '</dd><dt>Works</dt><dd>' + esc(t.hours) + '</dd><dt>Personal coaching</dt><dd>' + (t.fee ? rs(t.fee) + " per month" : "Not offered") + '</dd><dt>Group sessions</dt><dd>' + weekly + ' per week</dd><dt>Clients</dt><dd>' + mine.length + (mine.length ? ": " + mine.slice(0, 4).map(function (m) { return esc(m.name.split(" ")[0]); }).join(", ") + (mine.length > 4 ? " and " + (mine.length - 4) + " more" : "") : "") + '</dd></dl>' +
-        (t.bio ? '<p class="sub">' + esc(t.bio) + '</p>' : "") + '<div class="acts"><button class="mini" data-m="tr-edit" data-id="' + t.id + '">Edit</button><button class="mini del" data-m="tr-del" data-id="' + t.id + '">Delete</button></div></div>';
+        '<dl class="kv"><dt>Experience</dt><dd>' + esc(t.years) + ' years</dd><dt>Phone</dt><dd>' + esc(t.phone) + '</dd><dt>Works</dt><dd>' + esc(t.hours) + '</dd><dt>Personal coaching</dt><dd>' + (t.fee ? rs(t.fee) + " per month" : "Not offered") + '</dd><dt>Group sessions</dt><dd>' + weekly + ' per week</dd><dt>Login</dt><dd>' + (FC.logins().trainers[t.id] ? esc(FC.logins().trainers[t.id]) : "None yet") + '</dd><dt>Clients</dt><dd>' + mine.length + (mine.length ? ": " + mine.slice(0, 4).map(function (m) { return esc(m.name.split(" ")[0]); }).join(", ") + (mine.length > 4 ? " and " + (mine.length - 4) + " more" : "") : "") + '</dd></dl>' +
+        (t.bio ? '<p class="sub">' + esc(t.bio) + '</p>' : "") + '<div class="acts"><button class="mini" data-m="tr-edit" data-id="' + t.id + '">Edit</button><button class="mini go" data-m="tlogin" data-id="' + t.id + '">' + (FC.logins().trainers[t.id] ? "Reset login" : "Create login") + '</button><button class="mini del" data-m="tr-del" data-id="' + t.id + '">Delete</button></div></div>';
     }).join("") + "</div>";
     $("#tab-trainers").innerHTML = h;
   }
@@ -170,7 +204,7 @@
     var shop = FC.sales().filter(function (x) { return x.type === "shop" && x.memberId === id; }), m30 = ck.filter(function (k) { return k.ts > Date.now() - 30 * DAY; }).length;
     var cl = FC.classes(), up = FC.bookings().filter(function (b) { return b.memberId === id && b.date >= dkey(new Date()); }).sort(function (a, b) { return a.date < b.date ? -1 : 1; });
     dPr.innerHTML = '<form class="dlg-form" id="pr-form"><h2>' + esc(m.name) + '</h2>' +
-      '<dl class="kv"><dt>Membership</dt><dd>' + PL[m.plan].name + ", " + (status(m) === "pending" ? "not paid yet" : status(m)) + (m.expires ? ", until " + fdate(m.expires) : "") + '</dd><dt>Joined</dt><dd>' + fdate(m.joined) + '</dd><dt>Visits</dt><dd>' + ck.length + " in total, " + m30 + " in the last 30 days" + (ck[0] ? ", last on " + fdate(ck[0].ts) : "") + '</dd><dt>Paid so far</dt><dd>' + rs(spent) + " on membership" + (shop.length ? ", " + shop.length + " shop order" + (shop.length > 1 ? "s" : "") : "") + '</dd><dt>Booked sessions</dt><dd>' + (up.length ? up.slice(0, 4).map(function (b) { var c = byId(cl, b.classId); return c ? esc(c.name) + " " + b.date.slice(5) : ""; }).join(", ") : "None coming up") + '</dd></dl>' +
+      '<dl class="kv"><dt>Membership</dt><dd>' + PL[m.plan].name + ", " + (status(m) === "pending" ? "not paid yet" : status(m)) + (m.expires ? ", until " + fdate(m.expires) : "") + '</dd><dt>Joined</dt><dd>' + fdate(m.joined) + '</dd><dt>Visits</dt><dd>' + ck.length + " in total, " + m30 + " in the last 30 days" + (ck[0] ? ", last on " + fdate(ck[0].ts) : "") + '</dd><dt>Paid so far</dt><dd>' + rs(spent) + " on membership" + (shop.length ? ", " + shop.length + " shop order" + (shop.length > 1 ? "s" : "") : "") + '</dd><dt>Member login</dt><dd>' + (FC.logins().members[id] ? "Set up" : "Not set up") + ' <button class="mini" type="button" id="mlogin-btn" data-m="mlogin" data-id="' + id + '">' + (FC.logins().members[id] ? "Reset password" : "Create login") + '</button></dd>' + (m.trainerNotes ? '<dt>Trainer notes</dt><dd>' + esc(m.trainerNotes) + '</dd>' : "") + '<dt>Booked sessions</dt><dd>' + (up.length ? up.slice(0, 4).map(function (b) { var c = byId(cl, b.classId); return c ? esc(c.name) + " " + b.date.slice(5) : ""; }).join(", ") : "None coming up") + '</dd></dl>' +
       '<div class="two"><div class="field"><label for="p-name">Full name</label><input id="p-name" type="text" required value="' + esc(m.name) + '"></div><div class="field"><label for="p-phone">Phone</label><input id="p-phone" type="tel" required value="' + esc(m.phone) + '"></div></div>' +
       '<div class="two"><div class="field"><label for="p-email">Email</label><input id="p-email" type="email" value="' + esc(m.email) + '"></div><div class="field"><label for="p-dob">Date of birth' + (m.dob ? " (age " + age(m.dob) + ")" : "") + '</label><input id="p-dob" type="date" value="' + esc(m.dob) + '"></div></div>' +
       '<div class="two"><div class="field"><label for="p-goal">Main goal</label><select id="p-goal">' + opts(GOALS, m.goal, "Not set") + '</select></div><div class="field"><label for="p-exp">Gym experience</label><select id="p-exp">' + opts(EXP, m.experience, "Not set") + '</select></div></div>' +
@@ -178,7 +212,7 @@
       '<div class="field"><label for="p-em">Emergency contact</label><input id="p-em" type="text" placeholder="Name and phone" value="' + esc(m.emergency) + '"></div>' +
       '<div class="field"><label for="p-health">Injuries or health notes (only what the member chose to tell you)</label><textarea id="p-health">' + esc(m.health) + '</textarea></div>' +
       '<div class="field"><label for="p-notes">Staff notes</label><textarea id="p-notes">' + esc(m.notes) + '</textarea></div>' +
-      '<div class="form-foot"><button class="btn solid" type="submit">Save profile</button><button class="btn" type="button" data-close>Close</button><a class="mini" target="_blank" rel="noopener" href="' + wa(m.phone, "Hi " + m.name.split(" ")[0] + ", this is Fitness Club.") + '">WhatsApp</a></div></form>';
+      '<div id="login-out"></div><div class="form-foot"><button class="btn solid" type="submit">Save profile</button><button class="btn" type="button" data-close>Close</button><a class="mini" target="_blank" rel="noopener" href="' + wa(m.phone, "Hi " + m.name.split(" ")[0] + ", this is Fitness Club.") + '">WhatsApp</a></div></form>';
     $("#pr-form").onsubmit = function (e) {
       e.preventDefault();
       var all = FC.members(), o = byId(all, id);
@@ -241,6 +275,10 @@
       ck.push({ id: FC.uid(), memberId: id, memberName: m.name, ts: Date.now() }); FC.saveCheckins(ck); state.q = ""; render();
     }
     else if (a === "profile") profile(id);
+    else if (a === "mlogin") memberLogin(id);
+    else if (a === "tlogin") trainerLogin(id);
   });
   window.FCMore = { render: render };
+  // admin.js can open the page before this file has loaded (for example when you reload while logged in), so draw now if it did.
+  if (!document.getElementById("app").hidden) render();
 })();

@@ -11,7 +11,7 @@ $userKey = 'login-user:' . $user;
 // 10 wrong tries per IP or 5 per username in 15 minutes locks logins for that IP or username until the window passes.
 if (rate_count($ipKey, 900) >= 10 || rate_count($userKey, 900) >= 5) fail('Too many attempts. Wait 15 minutes and try again.', 429);
 
-$st = db()->prepare('SELECT id, pass_hash, role FROM admin_users WHERE username = ?');
+$st = db()->prepare('SELECT id, pass_hash, role FROM admin_users WHERE username = ? AND role = 'owner'');
 $st->execute([$user]);
 $row = $st->fetch();
 
@@ -22,10 +22,8 @@ if (!$ok) {
   fail('Wrong username or password', 401);
 }
 
-session_boot();
-session_regenerate_id(true);
-$_SESSION = ['uid' => (int) $row['id'], 'role' => $row['role'], 'csrf' => bin2hex(random_bytes(32)), 'last' => time()];
+$csrf = start_session(['uid' => (int) $row['id'], 'role' => 'owner']);
 if (password_needs_rehash($row['pass_hash'], PASSWORD_DEFAULT)) {
   db()->prepare('UPDATE admin_users SET pass_hash = ? WHERE id = ?')->execute([password_hash($pass, PASSWORD_DEFAULT), $row['id']]);
 }
-out(['ok' => true, 'csrf' => $_SESSION['csrf'], 'user' => $user, 'role' => $row['role']]);
+out(['ok' => true, 'csrf' => $csrf, 'user' => $user, 'role' => 'owner']);

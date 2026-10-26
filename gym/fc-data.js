@@ -50,6 +50,10 @@ var FC = (function () {
       .catch(function () { pending--; emit("error", "Cannot reach the server."); });
   }
 
+  var logins = { members: {}, trainers: {} };   // server mode: who already has a login
+  function lget() { return get("fc_logins", { members: {}, trainers: {} }); }   // demo mode: stored in plain text, demo only
+  function sess(o) { try { sessionStorage.setItem("fc_session", JSON.stringify(o)); } catch (e) {} }
+
   var api = {
     PLANS: PLANS, get: get, set: set, uid: uid, addMonths: addMonths, remote: remote, admin: false,
     members: function () { return read("members"); },
@@ -72,8 +76,59 @@ var FC = (function () {
       return call("admin.php?action=bootstrap").then(function (j) {
         if (!j.ok) throw j;
         Object.keys(cache).forEach(function (c) { cache[c] = j[c] || []; snap[c] = snapOf(cache[c]); });
+        logins = j.logins || { members: {}, trainers: {} };
         return j;
       });
+    },
+    _call: call,
+    // ---- logins: one sign-in for members, trainers and the owner ----
+    signin: function (id, pw) {
+      if (remote) return call("signin.php", { id: id, password: pw }).then(function (j) { if (j.ok) csrf = j.csrf; return j; });
+      id = String(id || "").trim(); var l = lget(), bad = { ok: false, error: /[a-z]/i.test(id) ? "Wrong username or password" : "Wrong phone number or password" };
+      if (/[a-z]/i.test(id)) {
+        if (id.toLowerCase() === "admin" && pw === "admin123") { try { sessionStorage.setItem("fc_admin", "1"); } catch (e) {} sess({ role: "owner" }); return Promise.resolve({ ok: true, role: "owner" }); }
+        var t = Object.keys(l.trainers).filter(function (k) { return l.trainers[k].u === id.toLowerCase() && l.trainers[k].p === pw; })[0];
+        if (t) { sess({ role: "trainer", trainerId: t }); return Promise.resolve({ ok: true, role: "trainer" }); }
+      } else {
+        var m = api.findByPhone(id);
+        if (m && l.members[m.id] && l.members[m.id] === pw) { sess({ role: "member", memberId: m.id }); return Promise.resolve({ ok: true, role: "member" }); }
+      }
+      return Promise.resolve(bad);
+    },
+    session: function () {
+      if (remote) return call("me.php").then(function (j) { if (j.ok) csrf = j.csrf; return j; });
+      var o = null; try { o = JSON.parse(sessionStorage.getItem("fc_session")); } catch (e) {}
+      return Promise.resolve(o ? { ok: true, role: o.role, memberId: o.memberId, trainerId: o.trainerId } : { ok: false });
+    },
+    signout: function () {
+      try { sessionStorage.removeItem("fc_session"); sessionStorage.removeItem("fc_admin"); } catch (e) {}
+      return remote ? call("logout.php", {}).then(function () { csrf = ""; }, function () {}) : Promise.resolve();
+    },
+    logins: function () {
+      if (remote) return logins;
+      var l = lget(), m = {}, t = {};
+      Object.keys(l.members).forEach(function (k) { m[k] = true; });
+      Object.keys(l.trainers).forEach(function (k) { t[k] = l.trainers[k].u; });
+      return { members: m, trainers: t };
+    },
+    setMemberPassword: function (id, pw) {
+      if (remote) return call("admin.php", { action: "set_member_password", memberId: id, password: pw }).then(function (j) { if (j.ok) logins.members[id] = true; return j; });
+      var l = lget(); l.members[id] = pw; set("fc_logins", l); return Promise.resolve({ ok: true });
+    },
+    setTrainerLogin: function (tid, user, pw) {
+      user = String(user || "").trim().toLowerCase();
+      if (remote) return call("admin.php", { action: "set_trainer_login", trainerId: tid, username: user, password: pw }).then(function (j) { if (j.ok) logins.trainers[tid] = user; return j; });
+      var l = lget();
+      if (!/^[a-z0-9._-]{3,40}$/.test(user)) return Promise.resolve({ ok: false, error: "Username: 3 to 40 letters, numbers, dot, dash or underscore" });
+      var clash = Object.keys(l.trainers).some(function (k) { return k !== tid && l.trainers[k].u === user; });
+      if (clash || user === "admin") return Promise.resolve({ ok: false, error: "That username is taken. Choose another." });
+      l.trainers[tid] = { u: user, p: pw }; set("fc_logins", l); return Promise.resolve({ ok: true });
+    },
+    // ---- public schedule for the home page ----
+    publicSchedule: function () {
+      if (remote) return call("schedule.php").then(function (j) { return j.ok ? j.classes : []; }, function () { return []; });
+      var tn = {}; api.trainers().forEach(function (t) { tn[t.id] = t.name; });
+      return Promise.resolve(api.classes().map(function (c) { c.trainerName = tn[c.trainerId] || ""; return c; }).sort(function (a, b) { return a.time < b.time ? -1 : 1; }));
     },
     refresh: function () { return pending ? chain.then(api.load) : api.load(); },
     pendingWrites: function () { return pending; },
@@ -123,6 +178,27 @@ var FC = (function () {
       sel.innerHTML = Object.keys(PLANS).map(function (k) { return '<option value="' + k + '">' + PLANS[k].name + ", " + money(PLANS[k].price) + "</option>"; }).join("");
     });
   };
-  if (typeof document !== "undefined") { if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", api.bindPrices); else api.bindPrices(); }
+  // Fills the home page timetable (<tbody id="sched-body">) from the sessions set up in the admin. If there are none, the typed-in rows stay.
+  api.bindSchedule = function () {
+    var body = document.getElementById("sched-body"); if (!body) return;
+    var DS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    var days = function (a) {
+      a = a.slice().sort(function (x, y) { return x - y; }); var runs = [], i = 0;
+      while (i < a.length) { var j = i; while (j + 1 < a.length && a[j + 1] === a[j] + 1) j++; runs.push(j - i >= 2 ? DS[a[i]] + " to " + DS[a[j]] : a.slice(i, j + 1).map(function (d) { return DS[d]; }).join(", ")); i = j + 1; }
+      return runs.join(", ");
+    };
+    var t12 = function (t) { var p = t.split(":"), h = +p[0]; return (h % 12 || 12) + ":" + p[1] + (h < 12 ? " am" : " pm"); };
+    api.publicSchedule().then(function (list) {
+      if (!list.length) return;
+      body.innerHTML = "";
+      list.forEach(function (c) {
+        var tr = document.createElement("tr"), a = document.createElement("td"), b = document.createElement("td"), d = document.createElement("td");
+        a.textContent = t12(c.time); b.textContent = c.name + (c.dur !== 60 ? ", " + c.dur + " minutes" : ""); d.textContent = days(c.days); d.className = "days";
+        if (c.trainerName) { var s = document.createElement("small"); s.className = "coach"; s.textContent = "with " + c.trainerName; b.appendChild(s); }
+        tr.appendChild(a); tr.appendChild(b); tr.appendChild(d); body.appendChild(tr);
+      });
+    });
+  };
+  if (typeof document !== "undefined") { if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { api.bindPrices(); api.bindSchedule(); }); else { api.bindPrices(); api.bindSchedule(); } }
   return api;
 })();

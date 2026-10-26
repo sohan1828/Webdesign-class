@@ -268,3 +268,4 @@ dialog .price small { font: 400 1rem var(--body); color: var(--dust); }
 .ok { color: var(--shoe); font-weight: 600; margin-bottom: 1rem; }
 @media (max-width: 1000px) { .products { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 520px) { .products { grid-template-columns: 1fr; } }
+.sched .coach { display: block; font-weight: 400; font-size: .9rem; color: #5b5547; margin-top: .15rem; }

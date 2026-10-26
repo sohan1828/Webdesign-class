@@ -5,7 +5,8 @@ CREATE TABLE IF NOT EXISTS admin_users (
   id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   username    VARCHAR(40)  NOT NULL UNIQUE,
   pass_hash   VARCHAR(255) NOT NULL,
-  role        VARCHAR(20)  NOT NULL DEFAULT 'owner',
+  role        VARCHAR(20)  NOT NULL DEFAULT 'owner',   -- owner or trainer
+  trainer_id  VARCHAR(40)  NULL,                       -- which trainer record a trainer login belongs to
   created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -15,8 +16,10 @@ CREATE TABLE IF NOT EXISTS members (
   id      VARCHAR(40) PRIMARY KEY,
   phone   VARCHAR(15) NOT NULL,
   joined  BIGINT      NOT NULL,
+  trainer_id VARCHAR(40) NULL,
   data    LONGTEXT    NOT NULL,
-  UNIQUE KEY uq_members_phone (phone)
+  UNIQUE KEY uq_members_phone (phone),
+  KEY ix_members_trainer (trainer_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS sales (
@@ -63,4 +66,10 @@ CREATE TABLE IF NOT EXISTS rate_limits (
   k   VARCHAR(100) NOT NULL,
   ts  INT UNSIGNED NOT NULL,
   KEY ix_rate (k, ts)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Member logins for the My account page. The member signs in with their phone number.
+CREATE TABLE IF NOT EXISTS member_logins (
+  member_id  VARCHAR(40)  PRIMARY KEY,
+  pass_hash  VARCHAR(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
