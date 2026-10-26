@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shop | Fitness Club</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Big+Shoulders+Display:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <a class="brand" href="index.html"><img src="logo-mark.png" alt="">Fitness Club</a>
+  <nav aria-label="Main">
+    <ul class="nav">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="index.html#programs">Programs</a></li>
+      <li><a href="index.html#schedule">Schedule</a></li>
+      <li><a href="plan.html">My plan</a></li>
+      <li><a href="shop.html" aria-current="page">Shop</a></li>
+      <li><a href="pricing.html">Pricing</a></li>
+    </ul>
+  </nav>
+  <div class="actions">
+    <button class="btn keep" id="cart-open" type="button">Cart (<span id="cart-count">0</span>)</button>
+    <a class="btn" href="login.html">Log in</a>
+  </div>
+  <button class="menu-btn" aria-label="Open menu" aria-expanded="false"><span></span></button>
+</header>
+
+<main>
+  <section class="page-top">
+    <div class="pricing-head">
+      <h1>Gear and supplements</h1>
+      <p>Everything you need for the plan you just built. Pick up at the front desk or get it delivered.</p>
+    </div>
+    <div class="filters" role="group" aria-label="Filter products">
+      <button type="button" data-f="all" aria-pressed="true">All</button>
+      <button type="button" data-f="supp" aria-pressed="false">Supplements</button>
+      <button type="button" data-f="gear" aria-pressed="false">Gear</button>
+    </div>
+    <div class="products" id="products"></div>
+  </section>
+</main>
+
+<dialog id="cart" class="drawer">
+  <div class="drawer-head"><h2>Your cart</h2><button type="button" class="btn" id="cart-close">Close</button></div>
+  <div id="cart-body"></div>
+</dialog>
+
+<footer id="contact">
+  <div class="foot">
+    <div><h4>Fitness Club</h4><p>Your street, Your city<br>Call +000 000 000 000<br>Sunday to Friday, 5:30 am to 9 pm</p></div>
+    <div><h4>Explore</h4><a href="index.html#programs">Programs</a><a href="plan.html">My plan</a><a href="shop.html">Shop</a><a href="pricing.html">Pricing</a></div>
+    <div><h4>Members</h4><a href="login.html">Log in</a><a href="index.html#join">Join the club</a></div>
+  </div>
+  <p class="legal">&copy; Fitness Club</p>
+</footer>
+
+<script src="fc-data.js"></script>
+<script src="script.js"></script>
+<script>
+(function () {
+  var P = [
+    { id: "whey", n: "Whey protein, 1 kg", d: "Mixes easily with water or milk. Check the label for flavour and serving size.", p: 4800, c: "supp", i: "tub" },
+    { id: "gainer", n: "Mass gainer, 3 kg", d: "A high-calorie shake for people who find it hard to eat enough to gain weight.", p: 6900, c: "supp", i: "bigtub" },
+    { id: "creatine", n: "Creatine monohydrate, 300 g", d: "Unflavoured powder. Take a small scoop daily with water.", p: 2400, c: "supp", i: "smalltub" },
+    { id: "bars", n: "Protein bars, box of 12", d: "A snack you can keep in your gym bag. Check the label for ingredients and allergens.", p: 2200, c: "supp", i: "bar" },
+    { id: "belt", n: "Lifting belt", d: "Firm leather belt with a steel buckle, for heavy squats and deadlifts.", p: 3200, c: "gear", i: "belt" },
+    { id: "straps", n: "Lifting straps, pair", d: "Cotton straps that help your grip hold on during heavy pulls.", p: 900, c: "gear", i: "straps" },
+    { id: "shaker", n: "Shaker bottle, 700 ml", d: "Leak-proof lid with a mixing ball.", p: 500, c: "gear", i: "shaker" },
+    { id: "gloves", n: "Training gloves", d: "Padded palms to protect your hands on bars and dumbbells.", p: 1100, c: "gear", i: "glove" }
+  ];
+  var A = 'fill="#f06a1c"', G = 'fill="#efe8da"', D = 'fill="#15130f"';
+  var ICON = {
+    tub: '<rect x="30" y="42" width="60" height="60" rx="6" ' + G + '/><rect x="26" y="28" width="68" height="16" rx="4" ' + A + '/><rect x="40" y="58" width="40" height="28" rx="3" ' + A + '/>',
+    bigtub: '<rect x="22" y="36" width="76" height="68" rx="7" ' + G + '/><rect x="18" y="22" width="84" height="16" rx="4" ' + A + '/><rect x="34" y="56" width="52" height="32" rx="3" ' + A + '/>',
+    smalltub: '<rect x="38" y="54" width="44" height="48" rx="5" ' + G + '/><rect x="35" y="42" width="50" height="14" rx="4" ' + A + '/><rect x="45" y="68" width="30" height="20" rx="3" ' + A + '/>',
+    bar: '<g transform="rotate(-18 60 60)"><rect x="14" y="44" width="92" height="32" rx="6" ' + G + '/><rect x="38" y="44" width="22" height="32" ' + A + '/></g>',
+    belt: '<rect x="8" y="52" width="104" height="18" rx="3" ' + G + '/><rect x="28" y="38" width="64" height="46" rx="6" ' + G + '/><rect x="50" y="52" width="20" height="18" rx="2" fill="none" stroke="#f06a1c" stroke-width="4"/>',
+    straps: '<path d="M30 20 C10 60 20 100 50 100" fill="none" stroke="#efe8da" stroke-width="10" stroke-linecap="round"/><path d="M90 20 C110 60 100 100 70 100" fill="none" stroke="#f06a1c" stroke-width="10" stroke-linecap="round"/>',
+    shaker: '<rect x="42" y="44" width="36" height="60" rx="6" ' + G + '/><rect x="40" y="32" width="40" height="14" rx="4" ' + A + '/><rect x="54" y="22" width="12" height="12" rx="2" ' + A + '/>',
+    glove: '<rect x="32" y="54" width="56" height="48" rx="10" ' + G + '/><rect x="32" y="30" width="11" height="30" rx="5" ' + G + '/><rect x="46" y="24" width="11" height="36" rx="5" ' + G + '/><rect x="60" y="24" width="11" height="36" rx="5" ' + G + '/><rect x="74" y="30" width="11" height="30" rx="5" ' + G + '/><rect x="32" y="80" width="56" height="8" ' + A + '/>'
+  };
+  var KEY = "fc_cart", cart = {};
+  try { cart = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) {}
+  var rs = function (n) { return "Rs " + n.toLocaleString("en-US"); };
+  var byId = function (id) { return P.filter(function (x) { return x.id === id; })[0]; };
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(cart)); } catch (e) {} }
+  function count() { return Object.keys(cart).reduce(function (s, k) { return s + cart[k]; }, 0); }
+
+  var grid = document.getElementById("products");
+  function draw(f) {
+    grid.innerHTML = P.filter(function (x) { return f === "all" || x.c === f; }).map(function (x) {
+      return '<article class="product"><div class="thumb"><svg viewBox="0 0 120 120" role="img" aria-label="' + x.n + '">' + ICON[x.i] + '</svg></div>' +
+        '<h2>' + x.n + '</h2><p>' + x.d + '</p><div class="buy"><strong>' + rs(x.p) + '</strong><button class="btn solid" type="button" data-add="' + x.id + '">Add to cart</button></div></article>';
+    }).join("");
+  }
+  document.querySelector(".filters").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    this.querySelectorAll("button").forEach(function (x) { x.setAttribute("aria-pressed", x === b); });
+    draw(b.dataset.f);
+  });
+  grid.addEventListener("click", function (e) {
+    var id = e.target.dataset.add; if (!id) return;
+    cart[id] = (cart[id] || 0) + 1; save(); refresh();
+    e.target.textContent = "Added"; setTimeout(function () { e.target.textContent = "Add to cart"; }, 900);
+  });
+
+  var dlg = document.getElementById("cart"), body = document.getElementById("cart-body");
+  function refresh() { document.getElementById("cart-count").textContent = count(); if (dlg.open) drawCart(); }
+
+  function drawCart(done) {
+    if (done) { body.innerHTML = '<p class="ok">Order placed, ' + '<span id="who"></span>. We will call you to confirm delivery.</p><p class="demo">Demo mode: no order was sent. Connect this form to your server before you launch.</p>'; document.getElementById("who").textContent = done; return; }
+    var ids = Object.keys(cart);
+    if (!ids.length) { body.innerHTML = '<p class="placeholder">Your cart is empty.</p>'; return; }
+    var total = 0, rows = ids.map(function (id) {
+      var x = byId(id), line = x.p * cart[id]; total += line;
+      return '<li><div><strong>' + x.n + '</strong><span>' + rs(x.p) + ' each</span></div><div class="qty"><button type="button" data-q="-1" data-id="' + id + '" aria-label="Fewer">-</button><span>' + cart[id] + '</span><button type="button" data-q="1" data-id="' + id + '" aria-label="More">+</button></div><b>' + rs(line) + '</b></li>';
+    }).join("");
+    body.innerHTML = '<ul class="lines">' + rows + '</ul><p class="total"><span>Total</span><strong>' + rs(total) + '</strong></p>' +
+      '<form id="co" class="co"><div class="field"><label for="cn">Full name</label><input id="cn" type="text" autocomplete="name" required></div>' +
+      '<div class="field"><label for="cp">Phone</label><input id="cp" type="tel" autocomplete="tel" required></div>' +
+      '<div class="field"><label for="ca">Delivery address, or write "Pick up at gym"</label><input id="ca" type="text" autocomplete="street-address" required></div>' +
+      '<fieldset class="methods"><legend>Pay with</legend><label><input type="radio" name="pm" checked> Cash on delivery</label><label><input type="radio" name="pm"> eSewa</label><label><input type="radio" name="pm"> Khalti</label></fieldset>' +
+      '<button class="btn solid" type="submit">Place order</button></form>';
+  }
+  body.addEventListener("click", function (e) {
+    var q = e.target.dataset.q; if (!q) return;
+    var id = e.target.dataset.id; cart[id] += +q; if (cart[id] <= 0) delete cart[id]; save(); refresh();
+  });
+  body.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var n = document.getElementById("cn").value.trim().split(" ")[0];
+    if (window.FC) {
+      var tot = 0, items = Object.keys(cart).map(function (id) { var x = byId(id); tot += x.p * cart[id]; return cart[id] + " x " + x.n; }).join(", ");
+      FC.addSale({ type: "shop", amount: tot, label: items, customer: { name: document.getElementById("cn").value.trim(), phone: document.getElementById("cp").value.trim(), address: document.getElementById("ca").value.trim() }, method: document.querySelector("#co input[name=pm]:checked").parentNode.textContent.trim() });
+    }
+    cart = {}; save(); document.getElementById("cart-count").textContent = 0; drawCart(n);
+  });
+  document.getElementById("cart-open").onclick = function () { drawCart(); dlg.showModal(); };
+  document.getElementById("cart-close").onclick = function () { dlg.close(); };
+  dlg.addEventListener("click", function (e) { if (e.target === dlg) dlg.close(); });
+
+  draw("all"); refresh();
+})();
+</script>
+</body>
+</html>

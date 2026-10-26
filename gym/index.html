@@ -1,176 +1,161 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Fitness Club</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@100&display=swap"
-      rel="stylesheet"
-    />
-  </head>
-  <body>
-    <style>
-      body {
-        margin: 0px;
-        padding: 0px;
-        background-image: url("/Webdesign-class/gym/bg.jpg");
-        background-repeat: no-repeat;
-        display: block;
-        color: rgb(251, 253, 255);
-      }
-      .logo {
-        display: inline-block;
-        position: absolute;
-        top: 15px;
-        left: 10px;
-      }
-      .logo img {
-        width: 75px;
-        height: 75px;
-        margin:  auto;
-      }
-      .logo div {
-        line-height: 4px;
-        text-align: center;
-        font-size: 12px;
-      }
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fitness Club | Strength built on ordinary days</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Big+Shoulders+Display:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-      .mid {
-        border: 2px solid darkgray;
-        display: block;
-        width: 40%;
-        margin: 20px auto;
-        font-family: "Roboto", sans-serif;
-      }
+<header class="site-header">
+  <a class="brand" href="#home"><img src="logo-mark.png" alt="">Fitness Club</a>
+  <nav aria-label="Main">
+    <ul class="nav">
+      <li><a href="#home" aria-current="page">Home</a></li>
+      <li><a href="#programs">Programs</a></li>
+      <li><a href="#schedule">Schedule</a></li>
+      <li><a href="plan.html">My plan</a></li>
+      <li><a href="shop.html">Shop</a></li>
+      <li><a href="pricing.html">Pricing</a></li>
+      <li><a href="#join">Join</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+  <div class="actions">
+    <a class="btn keep" href="tel:+000000000000">Call us</a>
+    <a class="btn" href="login.html">Log in</a>
+  </div>
+  <button class="menu-btn" aria-label="Open menu" aria-expanded="false"><span></span></button>
+</header>
 
-      .navbar li {
-        font-size: 20px;
-        display: inline-block;
-      }
-      .navbar li a {
-        text-decoration: none;
-        color: aliceblue;
-        padding: 40px 25px;
-      }
-      .navbar li a:hover,
-      .navbar li a.active {
-        color: grey;
-        text-decoration: underline;
-      }
+<main id="home">
+  <div class="hero">
+    <div class="hero-copy">
+      <h1>Strength is built on ordinary days</h1>
+      <p>Full racks, a coached floor, and people who notice when you skip a session. Come in once and see the room.</p>
+      <div class="cta">
+        <a class="btn solid" href="#join">Join the club</a>
+        <a class="btn" href="plan.html">Build my plan</a>
+      </div>
+    </div>
+  </div>
 
-      .login {
-        position: absolute;
-        right: 24px;
-        display: inline-block;
-        padding: 8px;
-        top: 25px;
-      }
-      .btn {
-        font-family: "Roboto", sans-serif;
-        background-color: black;
-        margin: 9px auto;
-        padding: 8px 14px;
-        color: aliceblue;
-        border-radius: 20%;
-        font-size: 15px;
-        cursor: pointer;
-        border: 2px solid grey;
-        font-size: 13px;
-      }
-      .btn:hover {
-        color: rgb(216, 236, 127);
-      }
-      .container {
-        border: 2px solid rgb(67, 64, 64);
-        margin: 106px 80px;
-        padding: 75px;
-        width: 33%;
-        border-radius: 28px;
-        
-      }
-      .container h2 {
-        text-align: justify;
-      }
-      .container button {
-        display: block;
-        width: 125px;
-        margin: 15px auto;
-        border-radius: 14px;
-      }
-      .form-group input  {
-        font-family: "Roboto", sans-serif;
-        text-align: center;
-        width: 150px;
-        padding: 2px;
-        margin: 8px auto;
-        border: 2px solid grey;
-        display: block;
-        border-radius: 8px;
-        font-size: 19px;
-        background-color: aliceblue;
-      }
-      .gender{
-        text-align: center;
-      }
-      
-    </style>
-    <header class="header">
-      <div class="logo">
-        <img src="/gym/logo.png" alt="logo"/>
-        <div>Fitness Club</div>
+  <div class="facts"><ul>
+    <li><strong>5:30 am</strong><span>First session of the day</span></li>
+    <li><strong>4 programs</strong><span>From first visit to heavy lifts</span></li>
+    <li><strong>Free</strong><span>Intro session with a coach</span></li>
+    <li><strong>No lock-in</strong><span>Monthly plan, cancel any time</span></li>
+  </ul></div>
+
+  <section id="programs">
+    <div class="section-head">
+      <h2>What you can train</h2>
+      <p>Pick one, or mix them. A coach will help you choose in your first week.</p>
+    </div>
+    <div class="bento">
+      <article class="tile t1"><div><h3>Strength</h3><p>Squat, press and pull on barbells and platforms, with form checks from a coach.</p></div></article>
+      <article class="tile t2"><div><h3>Conditioning</h3><p>Group sessions built on intervals, carries and rowing, scaled to your level.</p></div></article>
+      <article class="tile t3"><div><h3>Coaching</h3><p>One-to-one plans for a goal you set.</p></div></article>
+      <article class="tile t4"><div><h3>Beginner start</h3><p>Three guided sessions to build a routine.</p></div></article>
+    </div>
+  </section>
+
+  <section class="light" id="schedule">
+    <div class="section-head">
+      <h2>This week on the floor</h2>
+      <p>Coached sessions run at these times. The gym floor is open between them.</p>
+    </div>
+    <table class="sched">
+      <thead><tr><th>Time</th><th>Session</th><th class="days-col">Days</th></tr></thead>
+      <tbody>
+        <tr><td>6:00 am</td><td>Strength floor, coached</td><td class="days">Sun to Fri</td></tr>
+        <tr><td>7:30 am</td><td>Conditioning</td><td class="days">Sun, Tue, Thu</td></tr>
+        <tr><td>12:30 pm</td><td>Lunch express, 30 minutes</td><td class="days">Mon to Fri</td></tr>
+        <tr><td>5:30 pm</td><td>Conditioning</td><td class="days">Mon, Wed, Fri</td></tr>
+        <tr><td>6:30 pm</td><td>Beginner start</td><td class="days">Mon, Wed</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="join" id="join">
+    <div class="wrap join-grid">
+      <div class="join-intro">
+        <h2>Ready to start?</h2>
+        <p>Fill in the form and we will call you to set up your first visit and answer questions about membership.</p>
+        <p class="hours">Open Sunday to Friday, 5:30 am to 9 pm</p>
       </div>
 
-      <div class="mid">
-        <ul class="navbar">
-          <li><a href="#">Home</a></li>
-          <li><a href="#">Fitness</a></li>
-          <li><a href="#">AboutUs</a></li>
-          <li><a href="#">Contact</a></li>
-        </ul>
-      </div>
-
-      <div class="login">
-        <button class="btn">Call Us</button>
-        <button class="btn">Login</button>
-      </div>
-    </header>
-    <div class="container">
-      <h2>
-        "Ready to start your fitness journey? Fill out our gym membership form
-        today and take the first step toward a healthier, happier you!"
-      </h2>
-      <form action="noaction.php">
-        <div class="form-group">
-        <input type="text" name="" placeholder="First Name" />
+      <form id="join-form">
+        <div class="field"><label for="first">First name</label><input id="first" name="first_name" type="text" autocomplete="given-name" required></div>
+        <div class="field"><label for="last">Last name</label><input id="last" name="last_name" type="text" autocomplete="family-name" required></div>
+        <div class="field"><label for="phone">Phone</label><input id="phone" name="phone" type="tel" autocomplete="tel" required></div>
+        <div class="field"><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="email" required></div>
+        <fieldset>
+          <legend>Gender</legend>
+          <label><input type="radio" name="gender" value="male" required> Male</label>
+          <label><input type="radio" name="gender" value="female"> Female</label>
+        </fieldset>
+        <div class="field full">
+          <label for="program">Program you are most interested in</label>
+          <select id="program" name="program">
+            <option>Strength</option><option>Conditioning</option>
+            <option>Personal coaching</option><option>Beginner start</option>
+          </select>
         </div>
-        <div class="form-group">
-          <input type="text" name="" placeholder="Last Name" />
+        <div class="field full">
+          <label for="plan">Membership plan</label>
+          <select id="plan" name="plan">
+            <option value="monthly">Monthly, Rs 2,500</option>
+            <option value="quarterly">Quarterly, Rs 6,500</option>
+            <option value="yearly">Yearly, Rs 22,000</option>
+          </select>
         </div>
-        <div class="form-group">
-          <input type="tel" name="" placeholder="Contact" />
+        <div class="field"><label for="goal">Your main goal</label>
+          <select id="goal" name="goal"><option value="">Choose one</option><option value="lose">Lose weight</option><option value="gain">Build muscle or gain weight</option><option value="fit">General fitness</option><option value="strength">Get stronger</option><option value="sport">Sport performance</option><option value="rehab">Recovery and health</option></select></div>
+        <div class="field"><label for="experience">Gym experience</label>
+          <select id="experience" name="experience"><option value="">Choose one</option><option value="new">Complete beginner</option><option value="some">Some experience</option><option value="exp">Experienced</option></select></div>
+        <div class="field"><label for="dob">Date of birth (optional)</label><input id="dob" name="dob" type="date"></div>
+        <div class="field"><label for="source">How did you hear about us?</label>
+          <select id="source" name="source"><option value="">Choose one</option><option value="friend">Friend or family</option><option value="social">Facebook or Instagram</option><option value="walk">Walked past</option><option value="google">Google search</option><option value="other">Other</option></select></div>
+        <div class="form-foot">
+          <button class="btn solid" type="submit">Join the club</button>
+          <span id="thanks" role="status"></span>
         </div>
-        <div class="form-group">
-          <input type="email" name="" placeholder="Email" />
-        </div>
-    
-        <div class="gender">
-             <label for="Gender">Gender:</label>
-             
-             
-               <input type="radio"name="Gender">
-               <label for="Gender1">Male</label>
-               <input type="radio" name="Gender"~>
-               <label for="Gender2">Female</label>
-            
-              </div>
-
-        
-        <button class="btn">Submit</button>
-        
-      </div>   
       </form>
+    </div>
+  </section>
+</main>
 
-  </body>
+<footer id="contact">
+  <div class="foot">
+    <div><h4>Fitness Club</h4><p>Your street, Your city<br>Call +000 000 000 000<br>Sunday to Friday, 5:30 am to 9 pm</p></div>
+    <div><h4>Explore</h4><a href="#programs">Programs</a><a href="#schedule">Schedule</a><a href="pricing.html">Pricing</a></div>
+    <div><h4>Members</h4><a href="login.html">Log in</a><a href="#join">Join the club</a><a href="admin.html">Admin</a></div>
+  </div>
+  <p class="legal">&copy; Fitness Club</p>
+</footer>
+
+<script>
+  // Shows a confirmation on the page. Replace with a real submit (action="your-handler.php") when your backend is ready.
+  document.getElementById("join-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var name = document.getElementById("first").value.trim();
+    if (window.FC) {
+      var g = document.querySelector('input[name=gender]:checked');
+      FC.addMember({ name: (name + " " + document.getElementById("last").value.trim()).trim(), phone: document.getElementById("phone").value.trim(),
+        email: document.getElementById("email").value.trim(), gender: g ? g.value : "", plan: document.getElementById("plan").value,
+        program: document.getElementById("program").value, goal: document.getElementById("goal").value, experience: document.getElementById("experience").value,
+        source: document.getElementById("source").value, dob: document.getElementById("dob").value });
+    }
+    document.getElementById("thanks").textContent = "Thanks, " + name + ". We will call you soon.";
+    this.reset();
+  });
+</script>
+<script src="fc-data.js"></script>
+<script src="script.js"></script>
+</body>
 </html>

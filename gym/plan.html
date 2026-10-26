@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plan builder | Fitness Club</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Big+Shoulders+Display:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <a class="brand" href="index.html"><img src="logo-mark.png" alt="">Fitness Club</a>
+  <nav aria-label="Main">
+    <ul class="nav">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="index.html#programs">Programs</a></li>
+      <li><a href="index.html#schedule">Schedule</a></li>
+      <li><a href="plan.html" aria-current="page">My plan</a></li>
+      <li><a href="shop.html">Shop</a></li>
+      <li><a href="pricing.html">Pricing</a></li>
+      <li><a href="index.html#join">Join</a></li>
+    </ul>
+  </nav>
+  <div class="actions">
+    <a class="btn keep" href="tel:+000000000000">Call us</a>
+    <a class="btn" href="login.html">Log in</a>
+  </div>
+  <button class="menu-btn" aria-label="Open menu" aria-expanded="false"><span></span></button>
+</header>
+
+<main>
+  <section class="page-top">
+    <div class="pricing-head">
+      <h1>Your plan, built around your body</h1>
+      <p>Enter your height, weight and goal. You get your daily calorie and protein targets right away. After payment, you get a weekly schedule with every exercise, set and rep.</p>
+    </div>
+
+    <div class="plan-grid">
+      <form id="plan-form" class="plan-form" novalidate>
+        <div class="field"><label for="age">Age</label><input id="age" type="number" min="18" max="70" inputmode="numeric" required></div>
+        <fieldset>
+          <legend>Sex</legend>
+          <label><input type="radio" name="sex" value="male" checked> Male</label>
+          <label><input type="radio" name="sex" value="female"> Female</label>
+        </fieldset>
+        <div class="field"><label for="height">Height (cm)</label><input id="height" type="number" min="130" max="220" inputmode="decimal" required></div>
+        <div class="field"><label for="weight">Weight (kg)</label><input id="weight" type="number" min="35" max="250" inputmode="decimal" required></div>
+        <div class="field full">
+          <label for="goal">Goal</label>
+          <select id="goal"><option value="lose">Lose weight</option><option value="gain">Gain weight and muscle</option></select>
+        </div>
+        <div class="field full">
+          <label for="exp">Training experience</label>
+          <select id="exp"><option value="beginner">Beginner (under 6 months)</option><option value="inter">Intermediate (6+ months)</option></select>
+        </div>
+        <div class="field full">
+          <label for="days">Days per week</label>
+          <select id="days"><option>3</option><option selected>4</option><option>5</option></select>
+        </div>
+        <div class="field full">
+          <label for="time">Preferred session time</label>
+          <select id="time"><option value="6:00 am">Early morning, 6:00 am</option><option value="12:30 pm">Lunch, 12:30 pm</option><option value="5:30 pm" selected>Evening, 5:30 pm</option></select>
+        </div>
+        <div class="form-foot">
+          <button class="btn solid" type="submit">Build my plan</button>
+          <span id="err" role="alert" class="err"></span>
+        </div>
+      </form>
+
+      <div id="result" class="result" aria-live="polite">
+        <p class="placeholder">Your targets will show here.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<dialog id="pay">
+  <form method="dialog" id="pay-form">
+    <h2>Unlock your plan</h2>
+    <p class="price">Rs 1,500 <small>one time</small></p>
+    <fieldset class="methods">
+      <legend>Pay with</legend>
+      <label><input type="radio" name="m" checked> eSewa</label>
+      <label><input type="radio" name="m"> Khalti</label>
+      <label><input type="radio" name="m"> Card</label>
+    </fieldset>
+    <p class="demo">Demo mode: no money is taken. Connect a real payment gateway before you launch.</p>
+    <div class="form-foot">
+      <button class="btn solid" type="submit" id="pay-btn">Pay Rs 1,500</button>
+      <button class="btn" type="button" id="pay-cancel">Cancel</button>
+    </div>
+  </form>
+</dialog>
+
+<footer id="contact">
+  <div class="wrap">
+    <span>Fitness Club, Your street, Your city</span>
+    <span>Call +000 000 000 000</span>
+  </div>
+</footer>
+
+<script src="fc-data.js"></script>
+<script src="script.js"></script>
+<script>
+(function () {
+  var KEY = "fc_plan", result = document.getElementById("result"), err = document.getElementById("err");
+  var dlg = document.getElementById("pay");
+
+  var DAYS = { 3: ["Sunday", "Tuesday", "Thursday"], 4: ["Sunday", "Monday", "Wednesday", "Thursday"], 5: ["Sunday", "Monday", "Tuesday", "Thursday", "Friday"] };
+  var X = {
+    fullA: ["Full body A", ["Squat", "Bench press or push-up", "Seated row", "Overhead press", "Plank, 3 x 30 to 45 seconds"]],
+    fullB: ["Full body B", ["Romanian deadlift", "Incline dumbbell press", "Lat pulldown", "Walking lunges", "Back extension"]],
+    upper: ["Upper body", ["Bench press", "Barbell or cable row", "Overhead press", "Lat pulldown", "Biceps curl", "Triceps pushdown"]],
+    lower: ["Lower body", ["Squat", "Romanian deadlift", "Leg press", "Leg curl", "Standing calf raise", "Plank, 3 x 30 to 45 seconds"]],
+    push: ["Push", ["Bench press", "Overhead press", "Incline dumbbell press", "Lateral raise", "Triceps pushdown"]],
+    pull: ["Pull", ["Deadlift or rack pull", "Lat pulldown", "Seated row", "Face pull", "Biceps curl"]],
+    legs: ["Legs", ["Squat", "Romanian deadlift", "Leg press", "Lunges", "Standing calf raise"]]
+  };
+  var SPLIT = {
+    3: ["fullA", "fullB", "fullA"],
+    4: ["upper", "lower", "upper", "lower"],
+    5: ["push", "pull", "legs", "upper", "lower"]
+  };
+
+  function calc(i) {
+    var bmi = i.weight / Math.pow(i.height / 100, 2);
+    var bmr = 10 * i.weight + 6.25 * i.height - 5 * i.age + (i.sex === "male" ? 5 : -161);
+    var tdee = bmr * ({ 3: 1.45, 4: 1.55, 5: 1.6 }[i.days]);
+    var kcal, note = "", goal = i.goal;
+    if (goal === "lose" && bmi < 18.5) { goal = "gain"; note = "Your BMI is under 18.5, so a weight loss plan would not be safe. This plan aims to build weight and muscle instead."; }
+    if (goal === "lose") {
+      kcal = Math.max(tdee * 0.8, i.sex === "male" ? 1500 : 1200);
+    } else {
+      kcal = tdee + 300;
+    }
+    if (goal === "gain" && bmi >= 27 && !note) note = "Your BMI is 27 or higher. Gaining weight may not be what you need. A coach can help you decide at your first visit.";
+    return {
+      bmi: bmi, kcal: Math.round(kcal / 10) * 10, protein: Math.round(i.weight * (goal === "lose" ? 2 : 1.8)),
+      water: (i.weight * 0.035).toFixed(1), rate: goal === "lose" ? "0.3 to 0.7 kg lost per week" : "0.2 to 0.4 kg gained per week",
+      goal: goal, note: note
+    };
+  }
+
+  function summary(i, c) {
+    return '<h2>Your targets</h2><dl class="stats">' +
+      '<div><dt>BMI</dt><dd>' + c.bmi.toFixed(1) + '</dd></div>' +
+      '<div><dt>Calories per day</dt><dd>' + c.kcal + '</dd></div>' +
+      '<div><dt>Protein per day</dt><dd>' + c.protein + ' g</dd></div>' +
+      '<div><dt>Water per day</dt><dd>' + c.water + ' L</dd></div></dl>' +
+      '<p class="rate">Expected pace: ' + c.rate + '.</p>' +
+      (c.note ? '<p class="warn">' + c.note + '</p>' : '');
+  }
+
+  function full(i, c) {
+    var keys = SPLIT[i.days], d = DAYS[i.days], gain = c.goal === "gain", beg = i.exp === "beginner";
+    var scheme = gain ? (beg ? "3 sets of 8 to 10" : "4 sets of 6 to 10") : (beg ? "3 sets of 10 to 12" : "3 to 4 sets of 8 to 12");
+    var finish = gain ? "5 minutes easy walk to cool down" : "15 to 20 minutes on the rower or incline treadmill at a steady pace";
+    var h = '<h3 class="subhead">Your weekly schedule</h3><div class="week">';
+    keys.forEach(function (k, n) {
+      h += '<article class="day"><header><strong>' + d[n] + '</strong><span>' + i.time + '</span></header><h4>' + X[k][0] + '</h4><ul>';
+      X[k][1].forEach(function (e) { h += '<li>' + e + (e.indexOf(" x ") > -1 ? "" : ", " + scheme) + '</li>'; });
+      h += '<li class="finish">' + finish + '</li></ul></article>';
+    });
+    h += '</div><h3 class="subhead">Rules for the week</h3><ul class="rules">' +
+      '<li>Rest 60 to 90 seconds between sets, and 2 to 3 minutes on heavy lifts.</li>' +
+      '<li>Add a little weight when you finish every set with good form and 1 or 2 reps left.</li>' +
+      '<li>Eat about ' + c.kcal + ' calories and ' + c.protein + ' g of protein on every day, including rest days.</li>' +
+      '<li>Weigh yourself 2 or 3 mornings a week and use the average. If your weight stays flat for 2 weeks, change your calories by 150.</li>' +
+      '<li>Ask a coach to check your form on squat, deadlift and bench in your first week.</li>' +
+      '<li>If you have an injury or a medical condition, see a doctor before you start.</li></ul>' +
+      '<button class="btn" id="reset" type="button">Start over</button>';
+    return h;
+  }
+
+  function render(state) {
+    var i = state.inputs, c = calc(i);
+    var html = summary(i, c);
+    if (state.paid) {
+      html += '<p class="unlocked">Plan unlocked.</p>' + full(i, c);
+    } else {
+      html += '<div class="locked"><h3>Your full plan is ready</h3><p>Pay once to see your ' + i.days + '-day schedule with times, every exercise with sets and reps, and the weekly rules.</p>' +
+        '<button class="btn solid" id="unlock" type="button">Unlock for Rs 1,500</button></div>';
+    }
+    result.innerHTML = html;
+    var u = document.getElementById("unlock"); if (u) u.onclick = function () { dlg.showModal(); };
+    var r = document.getElementById("reset"); if (r) r.onclick = function () { localStorage.removeItem(KEY); location.reload(); };
+  }
+
+  function load() { try { return JSON.parse(localStorage.getItem(KEY)); } catch (e) { return null; } }
+  function save(s) { try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) {} }
+
+  document.getElementById("plan-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var g = function (id) { return document.getElementById(id).value; };
+    var i = { age: +g("age"), sex: document.querySelector('input[name=sex]:checked').value, height: +g("height"), weight: +g("weight"),
+      goal: g("goal"), exp: g("exp"), days: +g("days"), time: g("time") };
+    if (!(i.age >= 18 && i.age <= 70)) { err.textContent = "Enter an age between 18 and 70."; return; }
+    if (!(i.height >= 130 && i.height <= 220)) { err.textContent = "Enter a height between 130 and 220 cm."; return; }
+    if (!(i.weight >= 35 && i.weight <= 250)) { err.textContent = "Enter a weight between 35 and 250 kg."; return; }
+    err.textContent = "";
+    var s = { inputs: i, paid: false }; save(s); render(s);
+    result.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  document.getElementById("pay-cancel").onclick = function () { dlg.close(); };
+  // Demo payment: replace with a real gateway (eSewa, Khalti) and confirm the payment on your server before showing the plan.
+  document.getElementById("pay-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var b = document.getElementById("pay-btn"); b.disabled = true; b.textContent = "Processing...";
+    setTimeout(function () {
+      var s = load(); s.paid = true; save(s); if (window.FC) FC.addSale({ type: "plan", amount: 1500, label: "Plan builder (" + (s.inputs.goal === "lose" ? "weight loss" : "weight gain") + ", " + s.inputs.days + " days)", method: "Demo" }); dlg.close(); b.disabled = false; b.textContent = "Pay Rs 1,500"; render(s);
+    }, 1200);
+  });
+
+  var saved = load(); if (saved && saved.inputs) render(saved);
+})();
+</script>
+</body>
+</html>

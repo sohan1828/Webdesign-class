@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Admin | Fitness Club</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Big+Shoulders+Display:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<div id="gate" class="gate">
+  <form id="gate-form" class="gate-box">
+    <img src="logo-mark.png" alt="" width="48" height="48">
+    <h1>Admin login</h1>
+    <div class="field"><label for="pw">Password</label><input id="pw" type="password" autocomplete="current-password" required></div>
+    <button class="btn solid" type="submit">Log in</button>
+    <p id="gate-err" class="err" role="alert"></p>
+    <p class="demo">Demo login. This password is stored in the page code, so anyone can read it. Real protection needs a server.</p>
+  </form>
+</div>
+
+<div id="app" hidden>
+  <header class="a-head">
+    <a class="brand" href="index.html"><img src="logo-mark.png" alt="">Fitness Club admin</a>
+    <nav class="tabs" aria-label="Admin sections">
+      <button type="button" data-tab="overview" aria-pressed="true">Overview</button>
+      <button type="button" data-tab="members" aria-pressed="false">Members</button>
+      <button type="button" data-tab="sales" aria-pressed="false">Sales</button>
+      <button type="button" data-tab="schedule" aria-pressed="false">Schedule</button>
+      <button type="button" data-tab="trainers" aria-pressed="false">Trainers</button>
+      <button type="button" data-tab="checkin" aria-pressed="false">Check-in</button>
+    </nav>
+    <button class="btn" id="logout" type="button">Log out</button>
+  </header>
+
+  <main class="a-main">
+    <div id="tab-overview"></div>
+    <div id="tab-members" hidden></div>
+    <div id="tab-sales" hidden></div>
+    <div id="tab-schedule" hidden></div>
+    <div id="tab-trainers" hidden></div>
+    <div id="tab-checkin" hidden></div>
+  </main>
+</div>
+
+<dialog id="add-dlg">
+  <form id="add-form" method="dialog">
+    <h2>Add member</h2>
+    <div class="field"><label for="a-name">Full name</label><input id="a-name" type="text" required></div>
+    <div class="field"><label for="a-phone">Phone</label><input id="a-phone" type="tel" required></div>
+    <div class="field"><label for="a-email">Email (optional)</label><input id="a-email" type="email"></div>
+    <div class="field"><label for="a-plan">Plan</label><select id="a-plan"></select></div>
+    <label class="check"><input type="checkbox" id="a-paid" checked> Paid now (starts the membership today)</label>
+    <div class="form-foot"><button class="btn solid" type="submit">Add member</button><button class="btn" type="button" id="a-cancel">Cancel</button></div>
+  </form>
+</dialog>
+
+<script src="fc-data.js"></script>
+<script src="admin.js"></script>
+<script src="admin-more.js"></script>
+</body>
+</html>
