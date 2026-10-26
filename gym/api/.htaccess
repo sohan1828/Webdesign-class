@@ -1,0 +1,5 @@
+# Apache 2.4. Keeps private files from being downloaded. On nginx, add equivalent "location" deny rules.
+Options -Indexes
+<FilesMatch "^(config(\.sample)?\.php|lib\.php|create_admin\.php|schema\.sql)$">
+  Require all denied
+</FilesMatch>

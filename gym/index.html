@@ -108,7 +108,7 @@
         </div>
         <div class="field full">
           <label for="plan">Membership plan</label>
-          <select id="plan" name="plan">
+          <select id="plan" name="plan" data-plan-select>
             <option value="monthly">Monthly, Rs 2,500</option>
             <option value="quarterly">Quarterly, Rs 6,500</option>
             <option value="yearly">Yearly, Rs 22,000</option>
@@ -121,6 +121,7 @@
         <div class="field"><label for="dob">Date of birth (optional)</label><input id="dob" name="dob" type="date"></div>
         <div class="field"><label for="source">How did you hear about us?</label>
           <select id="source" name="source"><option value="">Choose one</option><option value="friend">Friend or family</option><option value="social">Facebook or Instagram</option><option value="walk">Walked past</option><option value="google">Google search</option><option value="other">Other</option></select></div>
+        <div class="field full" style="position:absolute;left:-9999px" aria-hidden="true"><label for="website">Leave this empty</label><input id="website" name="website" type="text" tabindex="-1" autocomplete="off"></div>
         <div class="form-foot">
           <button class="btn solid" type="submit">Join the club</button>
           <span id="thanks" role="status"></span>
@@ -143,18 +144,23 @@
   // Shows a confirmation on the page. Replace with a real submit (action="your-handler.php") when your backend is ready.
   document.getElementById("join-form").addEventListener("submit", function (e) {
     e.preventDefault();
-    var name = document.getElementById("first").value.trim();
-    if (window.FC) {
-      var g = document.querySelector('input[name=gender]:checked');
-      FC.addMember({ name: (name + " " + document.getElementById("last").value.trim()).trim(), phone: document.getElementById("phone").value.trim(),
-        email: document.getElementById("email").value.trim(), gender: g ? g.value : "", plan: document.getElementById("plan").value,
-        program: document.getElementById("program").value, goal: document.getElementById("goal").value, experience: document.getElementById("experience").value,
-        source: document.getElementById("source").value, dob: document.getElementById("dob").value });
-    }
-    document.getElementById("thanks").textContent = "Thanks, " + name + ". We will call you soon.";
-    this.reset();
+    var form = this, name = document.getElementById("first").value.trim(), out = document.getElementById("thanks"), thanks = "Thanks, " + name + ". We will call you soon.";
+    var g = document.querySelector('input[name=gender]:checked');
+    var sent = window.FC ? FC.addMember({
+      name: (name + " " + document.getElementById("last").value.trim()).trim(), phone: document.getElementById("phone").value.trim(),
+      email: document.getElementById("email").value.trim(), gender: g ? g.value : "", plan: document.getElementById("plan").value,
+      program: document.getElementById("program").value, goal: document.getElementById("goal").value, experience: document.getElementById("experience").value,
+      source: document.getElementById("source").value, dob: document.getElementById("dob").value, website: document.getElementById("website").value
+    }) : null;
+    out.textContent = "Sending...";
+    // Demo mode answers straight away; server mode answers after the request. The wording is the same either way, so the form never tells a visitor whether a phone number is already a member.
+    Promise.resolve(sent).then(function (m) {
+      out.textContent = m && m.dup ? "This phone number is already registered, " + name + ". We will call you soon." : thanks;
+      form.reset();
+    }).catch(function () { out.textContent = "Sorry, we could not send your details. Please call us."; });
   });
 </script>
+<script src="fc-config.js"></script>
 <script src="fc-data.js"></script>
 <script src="script.js"></script>
 </body>

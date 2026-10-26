@@ -43,7 +43,7 @@
       <article class="plan">
         <p class="tag"></p>
         <h2>Monthly</h2>
-        <p class="price">Rs 2,500 <small>/ month</small></p>
+        <p class="price"><span data-price="monthly">Rs 2,500</span> <small>/ month</small></p>
         <p class="save">Pay month to month. Cancel any time.</p>
         <ul>
           <li>Full access to the gym floor</li>
@@ -56,8 +56,8 @@
       <article class="plan best">
         <p class="tag">Most popular</p>
         <h2>Quarterly</h2>
-        <p class="price">Rs 6,500 <small>/ 3 months</small></p>
-        <p class="save">About Rs 2,170 a month. You save Rs 1,000.</p>
+        <p class="price"><span data-price="quarterly">Rs 6,500</span> <small>/ 3 months</small></p>
+        <p class="save" data-save="quarterly">About Rs 2,170 a month. You save Rs 1,000.</p>
         <ul>
           <li>Everything in Monthly</li>
           <li>Group conditioning sessions</li>
@@ -69,8 +69,8 @@
       <article class="plan">
         <p class="tag"></p>
         <h2>Yearly</h2>
-        <p class="price">Rs 22,000 <small>/ year</small></p>
-        <p class="save">About Rs 1,830 a month. You save Rs 8,000.</p>
+        <p class="price"><span data-price="yearly">Rs 22,000</span> <small>/ year</small></p>
+        <p class="save" data-save="yearly">About Rs 1,830 a month. You save Rs 8,000.</p>
         <ul>
           <li>Everything in Quarterly</li>
           <li>Two personal coaching sessions</li>
@@ -91,6 +91,8 @@
   </div>
 </footer>
 
+<script src="fc-config.js"></script>
+<script src="fc-data.js"></script>
 <script src="script.js"></script>
 </body>
 </html>

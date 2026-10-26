@@ -25,7 +25,7 @@
 
   /* ---------- demo data for the new tabs ---------- */
   function seed() {
-    if (FC.get("fc_seeded2") || !FC.members().length) return;
+    if (FC.remote || FC.get("fc_seeded2") || !FC.members().length) return;
     var now = Date.now(), ms = FC.members();
     var T = [["Bishal Rana", "Strength and powerlifting", 8, "9841000001", "Sun to Fri, mornings", "Competed in national powerlifting. Focus on safe heavy lifting and technique."],
       ["Sunita Maharjan", "Weight loss and conditioning", 6, "9841000002", "Sun to Fri, all day", "Builds interval and fat-loss programs for beginners and returning members."],
@@ -167,7 +167,7 @@
     var m = byId(FC.members(), id); if (!m) return;
     var tr = FC.trainers(), ck = FC.checkins().filter(function (k) { return k.memberId === id; }).sort(function (a, b) { return b.ts - a.ts; });
     var pay = FC.sales().filter(function (x) { return x.memberId === id; }).sort(function (a, b) { return b.ts - a.ts; }), spent = pay.reduce(function (s, x) { return s + x.amount; }, 0);
-    var shop = FC.sales().filter(function (x) { return x.type === "shop" && x.customer && x.customer.name === m.name; }), m30 = ck.filter(function (k) { return k.ts > Date.now() - 30 * DAY; }).length;
+    var shop = FC.sales().filter(function (x) { return x.type === "shop" && x.memberId === id; }), m30 = ck.filter(function (k) { return k.ts > Date.now() - 30 * DAY; }).length;
     var cl = FC.classes(), up = FC.bookings().filter(function (b) { return b.memberId === id && b.date >= dkey(new Date()); }).sort(function (a, b) { return a.date < b.date ? -1 : 1; });
     dPr.innerHTML = '<form class="dlg-form" id="pr-form"><h2>' + esc(m.name) + '</h2>' +
       '<dl class="kv"><dt>Membership</dt><dd>' + PL[m.plan].name + ", " + (status(m) === "pending" ? "not paid yet" : status(m)) + (m.expires ? ", until " + fdate(m.expires) : "") + '</dd><dt>Joined</dt><dd>' + fdate(m.joined) + '</dd><dt>Visits</dt><dd>' + ck.length + " in total, " + m30 + " in the last 30 days" + (ck[0] ? ", last on " + fdate(ck[0].ts) : "") + '</dd><dt>Paid so far</dt><dd>' + rs(spent) + " on membership" + (shop.length ? ", " + shop.length + " shop order" + (shop.length > 1 ? "s" : "") : "") + '</dd><dt>Booked sessions</dt><dd>' + (up.length ? up.slice(0, 4).map(function (b) { var c = byId(cl, b.classId); return c ? esc(c.name) + " " + b.date.slice(5) : ""; }).join(", ") : "None coming up") + '</dd></dl>' +
@@ -236,7 +236,9 @@
       var m = byId(FC.members(), id), s = status(m);
       if (s === "pending") { alert("This member has not paid yet. Mark them paid first."); return; }
       if (s === "expired" && !confirm(m.name + "'s membership expired on " + fdate(m.expires) + ". Check in anyway?")) return;
-      var ck = FC.checkins(); ck.push({ id: FC.uid(), memberId: id, memberName: m.name, ts: Date.now() }); FC.saveCheckins(ck); state.q = ""; render();
+      var ck = FC.checkins(), recent = ck.filter(function (k) { return k.memberId === id && Date.now() - k.ts < 10 * 60 * 1000; })[0];
+      if (recent) { alert(m.name + " already checked in at " + ftime(recent.ts) + "."); return; }
+      ck.push({ id: FC.uid(), memberId: id, memberName: m.name, ts: Date.now() }); FC.saveCheckins(ck); state.q = ""; render();
     }
     else if (a === "profile") profile(id);
   });

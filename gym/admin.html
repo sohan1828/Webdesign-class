@@ -17,10 +17,11 @@
   <form id="gate-form" class="gate-box">
     <img src="logo-mark.png" alt="" width="48" height="48">
     <h1>Admin login</h1>
+    <div class="field" id="u-field" hidden><label for="user">Username</label><input id="user" type="text" autocomplete="username"></div>
     <div class="field"><label for="pw">Password</label><input id="pw" type="password" autocomplete="current-password" required></div>
     <button class="btn solid" type="submit">Log in</button>
     <p id="gate-err" class="err" role="alert"></p>
-    <p class="demo">Demo login. This password is stored in the page code, so anyone can read it. Real protection needs a server.</p>
+    <p class="demo" id="gate-note">Demo login. This password is stored in the page code, so anyone can read it. Real protection needs a server.</p>
   </form>
 </div>
 
@@ -35,6 +36,8 @@
       <button type="button" data-tab="trainers" aria-pressed="false">Trainers</button>
       <button type="button" data-tab="checkin" aria-pressed="false">Check-in</button>
     </nav>
+    <span id="sync" class="sub" role="status" aria-live="polite"></span>
+    <button class="btn" id="refresh" type="button" hidden>Refresh</button>
     <button class="btn" id="logout" type="button">Log out</button>
   </header>
 
@@ -60,6 +63,7 @@
   </form>
 </dialog>
 
+<script src="fc-config.js"></script>
 <script src="fc-data.js"></script>
 <script src="admin.js"></script>
 <script src="admin-more.js"></script>

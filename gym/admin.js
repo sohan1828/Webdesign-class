@@ -5,7 +5,7 @@
   var rs = function (n) { return "Rs " + Math.round(n).toLocaleString("en-US"); };
   var short = function (n) { return n >= 1000 ? "Rs " + (n / 1000).toFixed(n >= 10000 ? 0 : 1) + "k" : "Rs " + Math.round(n); };
   var fdt = function (t) { return new Date(t).toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "numeric", minute: "2-digit", hour12: true }); };
-  var PL = FC.PLANS, state = { q: "", status: "all", plan: "all", sort: "new", stype: "all" };
+  var PL = FC.PLANS, state = { q: "", status: "all", plan: "all", sort: "new", stype: "all", from: "", to: "" };
   var COLORS = { monthly: "#f06a1c", quarterly: "#efe8da", yearly: "#a79f8f", shop: "#5fa8a0", plan: "#c9a227" };
   var NAMES = { monthly: "Monthly plan", quarterly: "Quarterly plan", yearly: "Yearly plan", shop: "Shop", plan: "Plan builder" };
 
@@ -27,7 +27,7 @@
 
   /* ---------- demo data ---------- */
   function seed() {
-    if (FC.get("fc_seeded")) return;
+    if (FC.remote || FC.get("fc_seeded")) return;
     var now = Date.now(), ms = FC.members(), sl = FC.sales();
     var L = [["Aarav Sharma", "monthly", 12, 0], ["Sita Thapa", "monthly", 75, 2], ["Bikash Rai", "monthly", 70, 1], ["Anita Gurung", "quarterly", 40, 0],
       ["Rohan KC", "quarterly", 200, 1], ["Priya Shrestha", "yearly", 150, 0], ["Suman Lama", "monthly", 28, 0], ["Nisha Karki", "monthly", 58, 1],
@@ -152,19 +152,37 @@
 
   /* ---------- sales ---------- */
   function sales() {
-    var all = FC.sales().sort(function (a, b) { return b.ts - a.ts; }), rows = all.filter(function (x) { return state.stype === "all" || x.type === state.stype; });
+    var all = FC.sales().sort(function (a, b) { return b.ts - a.ts; }), rows = all.filter(function (x) {
+      return (state.stype === "all" || x.type === state.stype) && (!state.from || x.ts >= new Date(state.from + "T00:00:00").getTime()) && (!state.to || x.ts < new Date(state.to + "T00:00:00").getTime() + DAY);
+    });
     var total = rows.reduce(function (s, x) { return s + x.amount; }, 0);
     var h = '<div class="toolbar"><select id="s-type" aria-label="Type">' + [["all", "All sales"], ["membership", "Memberships"], ["shop", "Shop orders"], ["plan", "Plan builder"]].map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === state.stype ? " selected" : "") + ">" + o[1] + "</option>"; }).join("") +
-      '</select><span class="sp"></span><strong>' + rows.length + ' sales, ' + rs(total) + '</strong></div>';
-    if (!rows.length) { $("#tab-sales").innerHTML = h + '<p class="empty">No sales yet.</p>'; $("#s-type").onchange = function () { state.stype = this.value; sales(); }; return; }
+      '</select><label class="sub">From <input id="s-from" type="date" value="' + state.from + '"></label><label class="sub">To <input id="s-to" type="date" value="' + state.to + '"></label><span class="sp"></span><strong>' + rows.length + ' sales, ' + rs(total) + '</strong><button class="btn" id="s-csv" type="button">Export CSV</button></div>';
+    if (!rows.length) { $("#tab-sales").innerHTML = h + '<p class="empty">No sales match.</p>'; bindSales(rows); return; }
     h += '<div class="panel scroll"><table class="tbl"><thead><tr><th>Date and time</th><th>Type</th><th>Details</th><th>Paid by</th><th class="r">Amount</th></tr></thead><tbody>';
     rows.forEach(function (x) {
       var who = x.type === "membership" ? esc(x.memberName) : x.type === "shop" ? esc((x.customer && x.customer.name) || "") + (x.customer && x.customer.phone ? '<span class="sub">' + esc(x.customer.phone) + '</span>' : '') : "Website visitor";
       h += '<tr><td>' + fdt(x.ts) + '</td><td>' + (x.type === "membership" ? "Membership" : x.type === "shop" ? "Shop" : "Plan builder") + '</td><td>' + esc(x.label) + '<span class="sub">' + who + '</span></td><td>' + esc(x.method || "") + '</td><td class="r">' + rs(x.amount) + '</td></tr>';
     });
-    $("#tab-sales").innerHTML = h + '</tbody></table></div><p style="margin-top:1.5rem"><button class="mini del" id="reset" type="button">Reset demo data</button></p>';
+    $("#tab-sales").innerHTML = h + '</tbody></table></div>' + (FC.remote ? "" : '<p style="margin-top:1.5rem"><button class="mini del" id="reset" type="button">Reset demo data</button></p>');
+    bindSales(rows);
+    if ($("#reset")) $("#reset").onclick = function () { if (confirm("Delete all members and sales in this browser?")) { ["fc_members", "fc_sales", "fc_seeded", "fc_seeded2", "fc_trainers", "fc_classes", "fc_bookings", "fc_checkins"].forEach(function (k) { localStorage.removeItem(k); }); init(); } };
+  }
+
+  function bindSales(rows) {
     $("#s-type").onchange = function () { state.stype = this.value; sales(); };
-    $("#reset").onclick = function () { if (confirm("Delete all members and sales in this browser?")) { ["fc_members", "fc_sales", "fc_seeded", "fc_seeded2", "fc_trainers", "fc_classes", "fc_bookings", "fc_checkins"].forEach(function (k) { localStorage.removeItem(k); }); init(); } };
+    $("#s-from").onchange = function () { state.from = this.value; sales(); };
+    $("#s-to").onchange = function () { state.to = this.value; sales(); };
+    $("#s-csv").onclick = function () { exportSales(rows); };
+  }
+  function exportSales(rows) {
+    var cell = function (v) { v = String(v == null ? "" : v); if (/^[=+\-@]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; };
+    var out = [["Date and time", "Type", "Details", "Paid by", "Phone", "Method", "Amount (Rs)"]].concat(rows.map(function (x) {
+      var c = x.customer || {};
+      return [new Date(x.ts).toISOString(), x.type, x.label, x.type === "membership" ? x.memberName : c.name || "", c.phone || "", x.method || "", x.amount];
+    }));
+    var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([out.map(function (r) { return r.map(cell).join(","); }).join("\n")], { type: "text/csv" }));
+    a.download = "sales.csv"; a.click(); URL.revokeObjectURL(a.href);
   }
 
   /* ---------- wiring ---------- */
@@ -178,22 +196,47 @@
     var b = e.target.closest("button"); if (!b) return;
     this.querySelectorAll("button").forEach(function (x) { x.setAttribute("aria-pressed", x === b); });
     ["overview", "members", "sales", "schedule", "trainers", "checkin"].forEach(function (t) { $("#tab-" + t).hidden = t !== b.dataset.tab; });
-    renderAll();
+    // Server mode: pick up new website sign-ups and orders each time you change tab.
+    if (FC.remote) FC.refresh().then(renderAll, renderAll); else renderAll();
   });
   $("#a-plan").innerHTML = Object.keys(PL).map(function (k) { return '<option value="' + k + '">' + PL[k].name + " (" + rs(PL[k].price) + ")</option>"; }).join("");
   $("#a-cancel").onclick = function () { $("#add-dlg").close(); };
   $("#add-form").addEventListener("submit", function () {
     var m = FC.addMember({ name: $("#a-name").value.trim(), phone: $("#a-phone").value.trim(), email: $("#a-email").value.trim(), plan: $("#a-plan").value });
+    if (m.dup) { alert(m.name + " is already registered with this phone number. Open their Profile or Renew them instead."); this.reset(); return; }
     if ($("#a-paid").checked) FC.pay(m.id);
     this.reset(); renderAll();
   });
   window.FCAdminRender = renderAll;
   function init() { seed(); renderAll(); }
-  function open() { $("#gate").hidden = true; $("#app").hidden = false; init(); }
+  function open() { $("#gate").hidden = true; $("#app").hidden = false; if (FC.remote) { FC.admin = true; $("#refresh").hidden = false; } init(); }
+  function startRemote() { return FC.load().then(open); }
   $("#gate-form").addEventListener("submit", function (e) {
     e.preventDefault();
-    if ($("#pw").value === PASS) { try { sessionStorage.setItem("fc_admin", "1"); } catch (x) {} open(); } else { $("#gate-err").textContent = "Wrong password."; }
+    var err = $("#gate-err"); err.textContent = "";
+    if (FC.remote) {
+      FC.login($("#user").value, $("#pw").value).then(function (j) {
+        if (!j.ok) { err.textContent = j.error || "Could not log in."; return; }
+        $("#pw").value = ""; return startRemote();
+      }).catch(function () { err.textContent = "Cannot reach the server."; });
+      return;
+    }
+    if ($("#pw").value === PASS) { try { sessionStorage.setItem("fc_admin", "1"); } catch (x) {} open(); } else { err.textContent = "Wrong password."; }
   });
-  $("#logout").onclick = function () { try { sessionStorage.removeItem("fc_admin"); } catch (x) {} location.reload(); };
-  try { if (sessionStorage.getItem("fc_admin")) open(); } catch (x) {}
+  $("#logout").onclick = function () {
+    if (FC.remote) { FC.logout().then(function () { location.reload(); }, function () { location.reload(); }); return; }
+    try { sessionStorage.removeItem("fc_admin"); } catch (x) {} location.reload();
+  };
+  $("#refresh").onclick = function () { FC.refresh().then(renderAll, function (j) { $("#sync").textContent = (j && j.error) || "Could not refresh."; }); };
+  window.addEventListener("fc-sync", function (e) {
+    var el = $("#sync"), d = e.detail; el.className = "sub" + (d.state === "error" ? " err" : "");
+    el.textContent = d.state === "saving" ? "Saving..." : d.state === "saved" ? "All changes saved" : d.msg + " Press Refresh to reload the saved data.";
+  });
+  if (FC.remote) {
+    $("#u-field").hidden = false; $("#user").required = true;
+    $("#gate-note").textContent = "Log in with the username and password you created on the server.";
+    FC.me().then(function (j) { if (j.ok) return startRemote(); }).catch(function () {});
+  } else {
+    try { if (sessionStorage.getItem("fc_admin")) open(); } catch (x) {}
+  }
 })();

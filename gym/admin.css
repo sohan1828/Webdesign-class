@@ -88,3 +88,5 @@ input[type=search]:focus-visible, input[type=date]:focus-visible, input[type=tim
 .dlg-form .two > * { min-width: 0; }
 .dlg-form .field.full { grid-column: auto; }
 dialog { margin: auto; }
+.err { color: #ff9d8e; }
+#sync { margin-left: auto; }
